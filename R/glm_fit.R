@@ -8,6 +8,22 @@ nagelkerke_r2 <- function(cox_snell_r2, LL_base, N) {
   round(cox_snell_r2 / (1 - exp((2 / N) * LL_base[1])), 6)
 }
 
+get_dependant_and_predictor <- function(formula) {
+  string <- as.character(formula)
+
+  # remove the ~
+  tilde <- stringr::str_detect(string, "~", negate = TRUE)
+
+  dependant_variable <- string[tilde][1]
+  # split character vector into each predictor
+  split <- strsplit(string[tilde][2], " ")[[1]]
+  # remove +
+  split <- split[stringr::str_detect(split, "\\+", negate = TRUE)]
+
+  list(y = dependant_variable, score = split[1], X = split)
+}
+
+
 #' Generate statistical metrics from a logistic regression using polygenic risk scores and case status
 #'
 #' @param df a dataframe with prs, case status and covariates
@@ -29,8 +45,18 @@ glm_prs_metrics <- function(df, base_formula, formula, pop_prev) {
   # if formulas, assume
   if(missing(base_formula)) base_formula <- stats::as.formula("case ~ PC1 + PC2 + PC3 + PC4 + PC5")
   if(missing(formula))      formula      <- stats::as.formula("case ~ score + PC1 + PC2 + PC3 + PC4 + PC5")
+  case <- get_dependant_and_predictor(formula)[["y"]]
+  prs <- get_dependant_and_predictor(formula)[['X']][1]
 
-  stopifnot(!any(c(missing(base_formula), missing(formula), missing(df))))
+  message(glue::glue(
+    "using variable {case} as y,
+     using variable {prs} as PRS column"
+  ))
+
+  # check that case y column is only 1 or zeroes
+  stopifnot("y should be a vector of 1 and 0" = sum(df[[case]] == 1 | df[[case]] == 0) == nrow(df))
+  # check that df variable is not missing
+  stopifnot(!missing(df))
 
   base_model <- stats::glm(base_formula, family = "binomial", data = df)
   full_model <- stats::glm(formula, family = "binomial", data = df)
@@ -43,21 +69,21 @@ glm_prs_metrics <- function(df, base_formula, formula, pop_prev) {
   cs_r2 <-  cox_snell_r2(ll_base, ll_full, N)
   nagel_r2 <- nagelkerke_r2(cs_r2, ll_base, N)
   prop_cases <-
-    nrow(dplyr::filter(df,  .data[["case"]] == 1)) / (nrow(dplyr::filter(df,  .data[["case"]] == 1)) + nrow(dplyr::filter(df,  .data[["case"]] == 0)))
+    nrow(dplyr::filter(df,  .data[[case]] == 1)) / (nrow(dplyr::filter(df,  .data[[case]] == 1)) + nrow(dplyr::filter(df,  .data[[case]] == 0)))
 
   if(!missing(pop_prev)) lia_r2 <- liability_scale_r2({{ pop_prev }}, nagel_r2, prop_cases) else lia_r2 <- NA
 
 
   probs <- stats::predict(full_model, type = "response")
-  auc_val <- as.numeric(pROC::auc(df[["case"]], probs))
+  auc_val <- as.numeric(pROC::auc(df[[case]], probs))
 
   # number of cases and controls
-  ncas <- dplyr::tibble(dplyr::count(df, .data[["case"]])) %>% dplyr::pull(n) %>% .[2]
-  ncon <- dplyr::tibble(dplyr::count(df, .data[["case"]])) %>% dplyr:: pull(n) %>% .[1]
+  ncas <- dplyr::tibble(dplyr::count(df, .data[[case]])) %>% dplyr::pull(n) %>% .[2]
+  ncon <- dplyr::tibble(dplyr::count(df, .data[[case]])) %>% dplyr:: pull(n) %>% .[1]
 
   odds_ratio <- full_model %>%
     broom::tidy(exponentiate=TRUE, conf.int=TRUE) %>%
-    dplyr::filter(.data[["term"]] =="score") %>%
+    dplyr::filter(.data[["term"]] == {{ prs }}) %>%
     dplyr::select(estimate, conf.low, conf.high, p.value)
 
   # merge metrics
