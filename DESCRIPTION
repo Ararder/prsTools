@@ -1,8 +1,8 @@
 Package: prsTools
-Title: What the Package Does (One Line, Title Case)
+Title: Tools for evaluating regression models using polygenic risk scores
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
+    person("Arvid", "Harder", , "arvid.harder@gmail.com.com", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
 Description: What the package does (one paragraph).
 License: MIT + file LICENSE
