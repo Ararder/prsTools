@@ -48,7 +48,7 @@ make_sbayesr_job <- function(infile,
                              burn_in=4000, thin=10, out_freq=10, out,
                              ldmatrix, gctb, name, from_env=TRUE) {
 
-  stopifnot(!missing(name))
+  stopifnot("Provide a name as prefix for the output files" = !missing(name))
 
   # use environment to figure out filepaths for GCTB and the ld matrix
   if(from_env){
@@ -105,12 +105,38 @@ run_sbayesr_job <- function(sumstat, name, sbatch=TRUE) {
   out <- Sys.getenv("PRS_ARCHIVE")
 
 
-  header <- make_slurm_header(name = name)
+  header <- make_slurm_header(name = name, mem = 40000)
   sbayes_job <- make_sbayesr_job(infile = sumstat, name = name)
   fp_job <- glue::glue(out,"/{name}_sbatch.sh")
   writeLines(c(header, sbayes_job),fp_job)
   if(sbatch) system(glue::glue("sbatch {fp_job}"))
 }
+
+#' Title
+#'
+#' @param bfile filepath to genetic bed bim fam genetic data
+#' @param score filepath to sumstat file to score
+#' @param out filepath to out directory
+#' @param threads number of threads
+#' @param name prefix for file names.
+#'
+#' @return a string
+#' @export
+#'
+#' @examples
+#' make_plink_score_job(bfile = "GENODATA/bedbimfam", score = "mdd_rescaled.snpRes", "my_dir/results", name = "mdd2021")
+#'
+make_plink_score_job <- function(bfile, score, out, threads=4, name){
+  glue::glue(
+    "plink2 ",
+    "--bfile {bfile} ",
+    "--score {score} 2 5 8 header ",
+    "--threads {threads} ",
+    "--variance-standardize ",
+    "--out {out}/{name}",
+  )
+}
+
 
 
 
