@@ -10,15 +10,18 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.1
 Suggests: 
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    withr
 Config/testthat/edition: 3
 Imports: 
     broom,
     dplyr,
+    fs,
     glue,
     magrittr,
     pROC,
     stats,
+    stringr,
     utils
 URL: https://github.com/Ararder/prsTools
 BugReports: https://github.com/Ararder/prsTools/issues
