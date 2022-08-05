@@ -4,7 +4,7 @@
 \alias{glm_prs_metrics}
 \title{Generate statistical metrics from a logistic regression using polygenic risk scores and case status}
 \usage{
-glm_prs_metrics(df, base_formula, formula, pop_prev)
+glm_prs_metrics(df, base_formula, formula, pop_prev, odds_ratio = FALSE)
 }
 \arguments{
 \item{df}{a dataframe with prs, case status and covariates}
@@ -14,6 +14,8 @@ glm_prs_metrics(df, base_formula, formula, pop_prev)
 \item{formula}{a glm formula for the full regression (case status on prs and covariates)}
 
 \item{pop_prev}{optional, for computing R2 on the liability scale.}
+
+\item{odds_ratio}{should the estimates be convert to odds_ratio?}
 }
 \value{
 a tibble

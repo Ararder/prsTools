@@ -30,6 +30,7 @@ get_dependant_and_predictor <- function(formula) {
 #' @param base_formula a glm formula of the logistic regression with only covariates
 #' @param formula a glm formula for the full regression (case status on prs and covariates)
 #' @param pop_prev optional, for computing R2 on the liability scale.
+#' @param odds_ratio should the estimates be convert to odds_ratio?
 #'
 #' @return a tibble
 #' @export
@@ -41,7 +42,7 @@ get_dependant_and_predictor <- function(formula) {
 #' full <- as.formula(case ~ score + PC1 + PC2 + sex)
 #' glm_prs_metrics(df, base, full, pop_prev = 0.01)
 #' }
-glm_prs_metrics <- function(df, base_formula, formula, pop_prev) {
+glm_prs_metrics <- function(df, base_formula, formula, pop_prev, odds_ratio=FALSE) {
   # if formulas, assume
   if(missing(base_formula)) base_formula <- stats::as.formula("case ~ PC1 + PC2 + PC3 + PC4 + PC5")
   if(missing(formula))      formula      <- stats::as.formula("case ~ score + PC1 + PC2 + PC3 + PC4 + PC5")
@@ -81,15 +82,21 @@ glm_prs_metrics <- function(df, base_formula, formula, pop_prev) {
   ncas <- dplyr::tibble(dplyr::count(df, .data[[case]])) %>% dplyr::pull(n) %>% .[2]
   ncon <- dplyr::tibble(dplyr::count(df, .data[[case]])) %>% dplyr:: pull(n) %>% .[1]
 
-  odds_ratio <- full_model %>%
-    broom::tidy(exponentiate=TRUE, conf.int=TRUE) %>%
+
+  if(odds_ratio) {
+    estimates <- broom::tidy(full_model,exponentiate=TRUE, conf.int=TRUE)
+  } else {
+    estimates <- broom::tidy(full_model)
+  }
+
+  estimates <- estimates <-
     dplyr::filter(.data[["term"]] == {{ prs }}) %>%
     dplyr::select(estimate, conf.low, conf.high, p.value)
 
   # merge metrics
   dplyr::tibble(N = N, ncas = ncas, ncon = ncon, cox = cs_r2,
          nagelkerke = nagel_r2, nagel_lia = lia_r2, auc = auc_val) %>%
-    dplyr::bind_cols(odds_ratio)
+    dplyr::bind_cols(estimates)
 
 
 
