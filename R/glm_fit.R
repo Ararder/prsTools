@@ -89,9 +89,8 @@ glm_prs_metrics <- function(df, base_formula, formula, pop_prev, odds_ratio=FALS
     estimates <- broom::tidy(full_model)
   }
 
-  estimates <- estimates <-
-    dplyr::filter(.data[["term"]] == {{ prs }}) %>%
-    dplyr::select(estimate, conf.low, conf.high, p.value)
+  estimates <- estimates %>%
+    dplyr::filter(.data[["term"]] == {{ prs }})
 
   # merge metrics
   dplyr::tibble(N = N, ncas = ncas, ncon = ncon, cox = cs_r2,
