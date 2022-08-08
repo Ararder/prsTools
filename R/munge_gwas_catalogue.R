@@ -86,7 +86,7 @@ ebi_to_ma <- function(df, n, snp_freq){
     select_cols() %>%
     check_n(n = n) %>%
     check_freq(snp_freq = snp_freq) %>%
-    dplyr::select(SNP, A1, A2, b, freq, b, se, p, N, position, chromosome)
+    dplyr::select(SNP, A1, A2,freq, b, se, p, N, position, chromosome)
 
 }
 
