@@ -1,5 +1,8 @@
 utils::globalVariables(c("any_of", "freq", "chromosome", "position", "p2"))
 
+utils::globalVariables(c("SNP", "A1", "A2", "b","se" ,"p" , "N"))
+
+
 nonharmonized_ma <- c("SNP" = "variant_id",
   "A1" = "effect_allele",
   "A2" = "other_allele",
@@ -82,7 +85,8 @@ ebi_to_ma <- function(df, n, snp_freq){
   df %>%
     select_cols() %>%
     check_n(n = n) %>%
-    check_freq(snp_freq = snp_freq)
+    check_freq(snp_freq = snp_freq) %>%
+    dplyr::select(SNP, A1, A2, b, freq, b, se, p, N)
 
 }
 
