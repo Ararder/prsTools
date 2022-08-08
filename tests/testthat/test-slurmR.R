@@ -38,21 +38,56 @@ test_that("Detects the environmental variables", {
 
 test_that("Creates a file based on sumstat name",{
 
+  strings <- "some stuff to write"
   gctb <- '/nfs/home/arvhar/gctb'
   ld <- '/nfs/home/arvhar/gctb/ldmatrix'
-  prs <- glue::glue('{getwd()}')
+  gwas <- withr::local_tempfile(lines = strings, pattern = "gwas.ma")
+  dir <- fs::path_dir(gwas)
+  file <- fs::path_file(gwas)
+
   withr::local_envvar(GCTB=gctb)
   withr::local_envvar(GCTB_LDMATRIX=ld)
-  withr::local_envvar(PRS_ARCHIVE=prs)
+  withr::local_envvar(PRS_ARCHIVE=dir)
 
-  fs::file_create("my_gwas.ma")
-  run_sbayesr_job("my_gwas.ma", sbatch = FALSE)
-  expect_true(fs::file_exists("my_gwas_sbatch.sh"))
-  fs::file_delete("my_gwas.ma")
-  fs::file_delete("my_gwas_sbatch.sh")
+  print(glue::glue("prs archive is {dir}"))
+  print(glue::glue("gwas sumstats in {gwas}"))
+  print(glue::glue("gwas file name is {file}"))
+
+
+  run_sbayesr_job(gwas, sbatch = FALSE)
+  print(fs::dir_ls(dir))
+  expect_true(fs::dir_exists(dir))
+
+  # print(glue::glue("making a folder in {dir} named {gwas}"))
+  # fs::file_delete("my_gwas.ma")
+  # fs::file_delete("my_gwas_sbatch.sh")
 
 })
 
+test_that("a directory is created", {
+    dir <- withr::local_tempdir()
+    withr::local_envvar(GCTB="home/gctb")
+    withr::local_envvar(GCTB_LDMATRIX="home/ldpaths.txt")
+    withr::local_envvar(PRS_ARCHIVE=dir)
+
+    gwas_path <- fs::file_touch(paste0(dir, "/", "made_up_gwas.ma"))
+
+    run_sbayesr_job(gwas_path, sbatch = FALSE)
+
+
+    expect_true(fs::dir_exists(
+      paste0(
+        dir, "/", "made_up_gwas"
+      )))
+
+    expect_true(fs::file_exists(
+      paste0(
+        dir, "/", "made_up_gwas", "/", "made_up_gwas_sbatch.sh"
+      )))
+
+
+
+})
 
 
 

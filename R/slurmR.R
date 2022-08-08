@@ -102,14 +102,28 @@ make_sbayesr_job <- function(infile,
 run_sbayesr_job <- function(sumstat, name, sbatch=TRUE) {
   # if the name argument has not been passed, use filename of the sumstat
   if(missing(name)) name <- stringr::str_remove(fs::path_file(sumstat), ".ma")
-  out <- Sys.getenv("PRS_ARCHIVE")
 
+  # get the filepath of where to make new folders
+  archive <- Sys.getenv("PRS_ARCHIVE")
 
-  header <- make_slurm_header(name = name, mem = 40000)
-  sbayes_job <- make_sbayesr_job(infile = sumstat, name = name)
-  fp_job <- glue::glue(out,"/{name}_sbatch.sh")
+  # make the output folder
+  outdir <- paste0(archive, "/", name)
+  fs::dir_create(outdir)
+
+  # make a slurm header
+  header <- make_slurm_header(name = name, out = outdir, mem = 40000)
+
+  # make the gctb job
+  sbayes_job <- make_sbayesr_job(infile = sumstat, name = name, out = outdir)
+
+  # make the filepath for the bash script, write it file
+  fp_job <- glue::glue(outdir,"/{name}_sbatch.sh")
   writeLines(c(header, sbayes_job),fp_job)
+
+  # dispatch job
   if(sbatch) system(glue::glue("sbatch {fp_job}"))
+
+
 }
 
 #' Title
