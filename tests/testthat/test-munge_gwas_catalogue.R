@@ -1,7 +1,7 @@
 
 df <- readr::read_tsv(test_path("data", "asthma_gwas.tsv"))
 missing_snps <- df %>% dplyr::mutate(freq = sample(c(0.01, NA_real_),size = 100, replace = TRUE))
-snp_freq <- readr::read_tsv(test_path("data" ,"snp_freq.tsv"))
+snp_freq <- readr::read_tsv(test_path("data" ,"snp_freqs.tsv"))
 
 
 

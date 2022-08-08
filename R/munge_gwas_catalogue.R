@@ -33,16 +33,25 @@ select_cols <- function(df){
 }
 
 
+freq_join <- function(df, snp_freqs) {
+  same <- df %>%
+    dplyr::inner_join(snp_freqs, by = c("SNP", "A1" = "A1", "A2" = "A2"))
+
+  flipped <- df %>%
+    dplyr::inner_join(snp_freqs, by = c("SNP", "A1" = "A2", "A2" = "A1"))
+
+    dplyr::bind_rows(same, flipped)
+}
 
 check_n <- function(x, n) {
   if(!"N" %in% colnames(x)) dplyr::mutate(x, N = {{ n}}) else x
 }
 
 check_freq <- function(x, snp_freq){
-  if(!"freq" %in% colnames(x)) return(dplyr::inner_join(x, snp_freq, by = "SNP"))
+  if(!"freq" %in% colnames(x)) return(freq_join(x, snp_freq))
 
   # if there are missing values in the frequency column, use imputed freqs
-  if(sum(is.na(x[['freq']])) > 0) return(dplyr::inner_join(dplyr::select(x, -freq), snp_freq, by = "SNP"))
+  if(sum(is.na(x[['freq']])) > 0) return(freq_join(dplyr::select(x, -freq), snp_freq))
 
   x
 
