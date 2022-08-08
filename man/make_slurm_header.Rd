@@ -2,33 +2,20 @@
 % Please edit documentation in R/slurmR.R
 \name{make_slurm_header}
 \alias{make_slurm_header}
-\title{Construct the slurm header for a script to be sent via sbatch}
+\title{Title}
 \usage{
-make_slurm_header(
-  t = 480,
-  cores = 4,
-  mem = 10000,
-  out = Sys.getenv("HOME"),
-  name = "slurm"
-)
+make_slurm_header(...)
 }
 \arguments{
-\item{t}{TIME, d:h:m:s 00:16:30:30}
-
-\item{cores}{number of cores to be used}
-
-\item{mem}{memory in megabytes}
-
-\item{out}{where to save the slurm output file}
-
-\item{name}{the name of the script}
+\item{...}{key-value pairs of slurm flags. Accepts both (ntasks = 6) and
+shortform (-N 6)}
 }
 \value{
-a string
+a character vector
 }
 \description{
-Construct the slurm header for a script to be sent via sbatch
+Title
 }
 \examples{
-make_slurm_header()
+make_slurm_header("-A" = "sens2017519", ntasks = 6, "-T" = "24:00:00")
 }

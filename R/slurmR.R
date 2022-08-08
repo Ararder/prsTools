@@ -1,25 +1,3 @@
-#' Construct the slurm header for a script to be sent via sbatch
-#'
-#' @param t TIME, d:h:m:s 00:16:30:30
-#' @param cores number of cores to be used
-#' @param mem memory in megabytes
-#' @param out where to save the slurm output file
-#' @param name the name of the script
-#'
-#' @return a string
-#' @export
-#'
-#' @examples make_slurm_header()
-make_slurm_header <- function(t=480, cores=4, mem=10000, out=Sys.getenv("HOME"), name="slurm") {
-  glue::glue("
-  #!/bin/bash
-  #SBATCH --time {t}
-  #SBATCH --ntasks {cores}
-  #SBATCH --mem {mem}
-  #SBATCH -o {out}/{name}-%j.out
-  ",)
-}
-
 #' Title
 #'
 #' @param infile filepath to a .ma file to be recaled
@@ -99,6 +77,7 @@ make_sbayesr_job <- function(infile,
 #' @examples \dontrun{
 #' run_sbayesr_job("path/to/my_sumstats.ma")
 #' }
+
 run_sbayesr_job <- function(sumstat, name, sbatch=TRUE) {
   # if the name argument has not been passed, use filename of the sumstat
   if(missing(name)) name <- stringr::str_remove(fs::path_file(sumstat), ".ma")
@@ -109,9 +88,9 @@ run_sbayesr_job <- function(sumstat, name, sbatch=TRUE) {
   # make the output folder
   outdir <- paste0(archive, "/", name)
   fs::dir_create(outdir)
+  slurmfile <- glue::glue("{outdir}/{name}-%j.out")
 
-  # make a slurm header
-  header <- make_slurm_header(name = name, out = outdir, mem = 40000)
+  header <- make_slurm_header(time = 480, ntasks = 4, mem = 40000, "-o" = slurmfile)
 
   # make the gctb job
   sbayes_job <- make_sbayesr_job(infile = sumstat, name = name, out = outdir)
@@ -149,6 +128,63 @@ make_plink_score_job <- function(bfile, score, out, threads=4, name){
     "--variance-standardize ",
     "--out {out}/{name}",
   )
+}
+
+parse_arg <- function(flag, arg, slurm=TRUE){
+  # add #SBATCH if slurm flag is TRUE
+  if(slurm) {
+    # are flags given in quick format? e.x (-J, -A, -T)
+    if(stringr::str_detect(flag, "-")) {
+      glue::glue("#SBATCH {flag} {arg}")
+    } else {
+      glue::glue("#SBATCH --{flag} {arg}")
+    }
+
+  } else {
+    glue::glue("--{flag} {arg}")
+  }
+
+}
+
+
+
+#' Title
+#'
+#' @param ... key-value pairs of slurm flags. Accepts both (ntasks = 6) and
+#' shortform (-N 6)
+#'
+#' @return a character vector
+#' @export
+#'
+#' @examples make_slurm_header("-A" = "sens2017519", ntasks = 6, "-T" = "24:00:00")
+make_slurm_header <- function(...) {
+  args <- list(...)
+  flags <- names(args)
+
+  all_args <- purrr::map2(names(args), args, parse_arg) %>% purrr::reduce(c)
+  c("#!/bin/bash", all_args) %>%
+    purrr::reduce(paste, sep = "\n")
+
+}
+
+#' Make a bash job from inside R
+#'
+#' @param exe filepath for program to execute
+#' @param ... key-value pair arguments to apply to program
+#'
+#' @return a character vector
+#' @export
+#'
+#' @examples make_bash_job(exe = "/home/gcta64", bfile = "geno/bedbimfam", "maf" = 0.01, out = "/home/arvhar/results")
+make_bash_job <- function(exe, ...) {
+  args <- list(...)
+  flags <- names(args)
+
+  all_args <- purrr::map2(names(args), args, parse_arg, slurm = FALSE) %>% purrr::reduce(c)
+  c(glue::glue("{exe}"), all_args) %>%
+    purrr::reduce(paste, sep = " ")
+
+
 }
 
 

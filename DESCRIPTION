@@ -20,6 +20,7 @@ Imports:
     glue,
     magrittr,
     pROC,
+    purrr,
     readr,
     stats,
     stringr,
