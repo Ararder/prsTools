@@ -80,7 +80,7 @@ make_sbayesr_job <- function(infile,
 
 run_sbayesr_job <- function(sumstat, name, sbatch=TRUE) {
   # if the name argument has not been passed, use filename of the sumstat
-  if(missing(name)) name <- stringr::str_remove(fs::path_file(sumstat), ".ma")
+  if(missing(name)) name <- fs::path_ext_remove(fs::path_file(sumstat))
 
   # get the filepath of where to make new folders
   archive <- Sys.getenv("PRS_ARCHIVE")
