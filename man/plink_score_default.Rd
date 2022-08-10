@@ -4,7 +4,7 @@
 \alias{plink_score_default}
 \title{Title}
 \usage{
-plink_score_default(bfile, score, out, threads = 16)
+plink_score_default(bfile, score, out, threads = 16, format = "pgen")
 }
 \arguments{
 \item{bfile}{filepath to genotype data}
@@ -14,6 +14,8 @@ plink_score_default(bfile, score, out, threads = 16)
 \item{out}{output directory and filename}
 
 \item{threads}{number of threads}
+
+\item{format}{bgen/pgen/etc}
 }
 \value{
 bash code

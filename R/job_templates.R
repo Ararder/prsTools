@@ -4,6 +4,7 @@
 #' @param score filepath to sumstat, a1 is column 2, column 5 is effect size
 #' @param out output directory and filename
 #' @param threads number of threads
+#' @param format bgen/pgen/etc
 #'
 #' @return bash code
 #' @export
@@ -11,10 +12,10 @@
 #' @examples \dontrun{
 #' plink_score_default("/cohort_x/name_genotypes", "my/rescaled/gwas.ma", "/store/prs/here/name")
 #' }
-plink_score_default <- function(bfile, score, out, threads=16){
+plink_score_default <- function(bfile, score, out, threads=16,format ="pgen"){
   glue::glue(
     "plink2 ",
-    "--pfile {bfile} ",
+    "--{format} {bfile} ",
     "--score {score} 2 5 8 ",
     "--threads {threads} ",
     "--variance-standardize ",
