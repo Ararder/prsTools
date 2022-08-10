@@ -188,6 +188,30 @@ make_bash_job <- function(exe, ...) {
 }
 
 
+#' Generate all combinations of the name column for two tibbles.
+#'
+#' @param genotype a tibble with the column name, and filepaths for each genotype cohort
+#' @param to_score a tibble with column name, and filepaths
+#'
+#' @return a tibble
+#' @export
+#'
+#' @examples \dontrun{
+#'
+#' make_score_df(genotypes, to_score)
+#' }
+make_score_df <- function(genotype, to_score) {
+  stopifnot("name" %in% colnames(genotype),
+            "name" %in% colnames(to_score))
+
+
+  tidyr::crossing(cohort = genotype$name, prs = to_score$name) %>%
+    dplyr::inner_join(genotype, by = c("cohort" = "name")) %>%
+    dplyr::inner_join(to_score, by = c("prs" = "name"))
+
+}
+
+
 
 
 

@@ -24,6 +24,7 @@ Imports:
     readr,
     stats,
     stringr,
+    tidyr,
     utils
 URL: https://github.com/Ararder/prsTools
 BugReports: https://github.com/Ararder/prsTools/issues
