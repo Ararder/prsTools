@@ -43,9 +43,11 @@ get_dependant_and_predictor <- function(formula) {
 #' glm_prs_metrics(df, base, full, pop_prev = 0.01)
 #' }
 glm_prs_metrics <- function(df, base_formula, formula, pop_prev, odds_ratio=FALSE) {
-  # if formulas, assume
-  if(missing(base_formula)) base_formula <- stats::as.formula("case ~ PC1 + PC2 + PC3 + PC4 + PC5")
-  if(missing(formula))      formula      <- stats::as.formula("case ~ score + PC1 + PC2 + PC3 + PC4 + PC5")
+  
+  # require base formula, formula and DF
+  stopifnot(!missing(base_formula))
+  stopifnot(!missing(formula))
+  stopifnot(!missing(df))
   case <- get_dependant_and_predictor(formula)[["y"]]
   prs <- get_dependant_and_predictor(formula)[['X']][1]
 
@@ -57,7 +59,7 @@ glm_prs_metrics <- function(df, base_formula, formula, pop_prev, odds_ratio=FALS
   # check that case y column is only 1 or zeroes
   stopifnot("y should be a vector of 1 and 0" = sum(df[[case]] == 1 | df[[case]] == 0) == nrow(df))
   # check that df variable is not missing
-  stopifnot(!missing(df))
+
 
   base_model <- stats::glm(base_formula, family = "binomial", data = df)
   full_model <- stats::glm(formula, family = "binomial", data = df)
