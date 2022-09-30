@@ -18,9 +18,9 @@ to_bash <- function(..., slurm=FALSE) {
   if(slurm){
     c("#!/bin/bash", purrr::map2_chr(names,args, ~paste0("#SBATCH ", .x, "=", .y)))
   } else {
-    purrr::map2_chr(names,args, ~paste0("--", .x, " ", .y)) |>
-      stringr::str_flatten(collapse = " ") |>
-      stringr::str_replace_all(string = _, "  ", " ")
+    purrr::map2_chr(names,args, ~paste0("--", .x, " ", .y)) %>%
+      stringr::str_flatten(collapse = " ") %>%
+      stringr::str_replace_all(string = ., "  ", " ")
 
   }
 

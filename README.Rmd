@@ -98,6 +98,7 @@ map_df(formula_list, glm_prs_metrics, df = test_df, base_formula = base_formula,
 
 
 # Commands for Slurm
+TBA - helper functions for generating slurm.sh files inside R
 
 ```{r pressure, echo = FALSE}
 # -A [accountname] - for uppmax
@@ -108,4 +109,4 @@ map_df(formula_list, glm_prs_metrics, df = test_df, base_formula = base_formula,
 # -J [name of the job]
 ```
 
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
+
